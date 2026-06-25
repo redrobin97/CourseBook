@@ -6,22 +6,19 @@
 
 using namespace std;
 
-//==================================================
+//***
 // Course Structure
-//==================================================
+//***
 
 struct Course {
     string courseNumber;
     string courseName;
-
     vector<string> prereqs;
-    
-
 };
 
-//==================================================
+//***
 // Tree Node
-//==================================================
+//***
 
 struct Node {
     Course course;
@@ -34,215 +31,323 @@ struct Node {
         left = nullptr;
         right = nullptr;
     }
-
 };
 
-//==================================================
+//***
 // Binary Search Tree Class
-//==================================================
+//***
 
 class BinarySearchTree {
 
 private:
-
     Node* root;
 
     void addNode(Node*& current, Course course);
-
     void inOrder(Node* node);
-
     Node* search(Node* current, string courseNumber);
-
     void destroyTree(Node* node);
 
 public:
-
     BinarySearchTree();
-
     ~BinarySearchTree();
 
     void Insert(Course course);
-
     void PrintCourseList();
-
     Course Search(string courseNumber);
 };
 
-//==================================================
+//***
 // Function Prototypes
-//==================================================
+//***
 
 void loadCourses(string fileName, BinarySearchTree& bst);
-
 void printCourseInfo(Course course);
-
 void displayMenu();
 
-//==================================================
+//***
 // Main
-//==================================================
+//***
 
 int main() {
 
+    // Create binary search tree
+    BinarySearchTree bst;
+
+    // Variables for menu
+    string fileName;
+    string courseNumber;
+    int choice = 0;
+
+    // Welcome message
+    cout << "Welcome to the course planner." << endl;
+
+    // Continue until user exits
+    while (choice != 9)
+    {
+        // Show menu and get choice
+        displayMenu();
+        cin >> choice;
+
+        switch (choice)
+        {
+        case 1:
+            // Load courses from file
+            cout << "Enter file name: ";
+            cin >> fileName;
+            loadCourses(fileName, bst);
+            break;
+
+        case 2:
+            // Print all courses
+            cout << "Here is a sample schedule:" << endl;
+            bst.PrintCourseList();
+            break;
+
+        case 3:
+        {
+            // Search for one course
+            cout << "Enter course number: ";
+            cin >> courseNumber;
+
+            Course course = bst.Search(courseNumber);
+
+            // Print result
+            if (course.courseNumber == "")
+            {
+                cout << "Course not found." << endl;
+            }
+            else
+            {
+                printCourseInfo(course);
+            }
+
+            break;
+        }
+
+        case 9:
+            // Exit program
+            cout << "Thank you for using the course planner." << endl;
+            break;
+
+        default:
+            // Invalid menu choice
+            cout << choice << " is not a valid option." << endl;
+            break;
+        }
+    }
+
+    return 0;
 }
 
-//==================================================
+//***
 // BinarySearchTree Functions
-//==================================================
+//***
 
-//constructor
 BinarySearchTree::BinarySearchTree() {
-
+    // Set root to empty
     root = nullptr;
-
 }
 
-//deconstructor
 BinarySearchTree::~BinarySearchTree() {
-
+    // Delete all nodes
     destroyTree(root);
 }
 
 void BinarySearchTree::Insert(Course course) {
 
-
-    if(root == nullptr)
+    // If tree is empty, create root node
+    if (root == nullptr)
     {
         root = new Node(course);
     }
-
-    else addNode(root, course);
-
+    else
+    {
+        // Otherwise insert into tree
+        addNode(root, course);
+    }
 }
 
 void BinarySearchTree::addNode(Node*& current, Course course) {
 
-    //if current spot empty, assign new node
-    if(current == nullptr)
+    // Empty position found, insert new node
+    if (current == nullptr)
     {
         current = new Node(course);
     }
-    //if less than current go left
-    else if(current->course.courseNumber > course.courseNumber)
+    // New course belongs on left
+    else if (current->course.courseNumber > course.courseNumber)
     {
         addNode(current->left, course);
     }
-    //else more than current go right
+    // New course belongs on right
     else
     {
         addNode(current->right, course);
     }
-    
 }
 
 void BinarySearchTree::PrintCourseList() {
-
-    //call inOrder starting at root
+    // Print courses in alphanumeric order
     inOrder(root);
-
 }
 
 void BinarySearchTree::inOrder(Node* node) {
 
-    //no node here (base case)
+    // No node to process
     if (node == nullptr)
     {
         return;
     }
 
-    //if left exists go left    
+    // Visit left side
     inOrder(node->left);
-    
-    //if no left then at lowest
+
+    // Print current course
     printCourseInfo(node->course);
 
-    //if no lefts remaining try right
+    // Visit right side
     inOrder(node->right);
-    
 }
 
 Course BinarySearchTree::Search(string courseNumber) {
 
-    //call search to find course
+    // Search tree starting at root
     Node* foundNode = search(root, courseNumber);
 
-    //if found
+    // Return course if found
     if (foundNode != nullptr)
     {
         return foundNode->course;
     }
 
-    //if not found return blank course
+    // Return empty course if not found
     Course emptyCourse;
     return emptyCourse;
-    
-
-
 }
 
 Node* BinarySearchTree::search(Node* current, string courseNumber) {
 
-
-    //end of search, not found
-    if(current == nullptr)
+    // End of branch, course not found
+    if (current == nullptr)
     {
-        //notfound
         return nullptr;
     }
 
-    // current = target, return
-    if(courseNumber == current->course.courseNumber)
+    // Course found
+    if (courseNumber == current->course.courseNumber)
     {
         return current;
     }
 
-    //if coursenumber to left, go left
-    if(courseNumber < current->course.courseNumber)
+    // Continue searching left
+    if (courseNumber < current->course.courseNumber)
     {
         return search(current->left, courseNumber);
     }
-
-    //if courseNumber is not current and not to left,  go right
+    // Continue searching right
     else
     {
         return search(current->right, courseNumber);
     }
-
-    
 }
 
 void BinarySearchTree::destroyTree(Node* node) {
 
-
-    //nothing to delete
-    if(node == nullptr)
+    // End of branch
+    if (node == nullptr)
     {
         return;
     }
 
-    //if something exists to left, go left
+    // Delete left subtree
     destroyTree(node->left);
-   
-    //if something exists to right, go right
-    destroyTree(node->right);
-    
-    //nothing exists past this point, delete node
-    delete node;
 
+    // Delete right subtree
+    destroyTree(node->right);
+
+    // Delete current node
+    delete node;
 }
 
-//==================================================
+//***
 // Helper Functions
-//==================================================
+//***
 
 void loadCourses(string fileName, BinarySearchTree& bst) {
 
+    // Open input file
+    ifstream file(fileName);
+
+    // Check if file opened
+    if (!file.is_open())
+    {
+        cout << "Error opening file." << endl;
+        return;
+    }
+
+    string line;
+
+    // Read one line at a time
+    while (getline(file, line))
+    {
+        // Create stream from line
+        stringstream ss(line);
+        string item;
+        Course course;
+
+        // Read course number
+        getline(ss, course.courseNumber, ',');
+
+        // Read course name
+        getline(ss, course.courseName, ',');
+
+        // Read prerequisites
+        while (getline(ss, item, ','))
+        {
+            course.prereqs.push_back(item);
+        }
+
+        // Insert course into tree
+        bst.Insert(course);
+    }
+
+    // Close file
+    file.close();
+
+    cout << "Courses loaded successfully." << endl;
 }
 
 void printCourseInfo(Course course) {
 
+    // Print course number and title
+    cout << course.courseNumber << ", " << course.courseName;
+
+    // Print prerequisites if any
+    if (course.prereqs.size() > 0)
+    {
+        cout << endl << "Prerequisites: ";
+
+        for (unsigned int i = 0; i < course.prereqs.size(); ++i)
+        {
+            cout << course.prereqs.at(i);
+
+            if (i < course.prereqs.size() - 1)
+            {
+                cout << ", ";
+            }
+        }
+    }
+
+    cout << endl;
 }
 
 void displayMenu() {
 
+    // Display menu options
+    cout << endl;
+    cout << "1. Load Data Structure" << endl;
+    cout << "2. Print Course List" << endl;
+    cout << "3. Print Course" << endl;
+    cout << "9. Exit" << endl;
+    cout << "What would you like to do? ";
 }
